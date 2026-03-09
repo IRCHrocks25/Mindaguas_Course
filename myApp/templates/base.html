@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}S.O.P Master - Member Hub{% endblock %}</title>
+    <title>{% block title %}Mindaguas.AI - Member Hub{% endblock %}</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -71,7 +71,7 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-[#0a0e27] via-[#1a1f3a] to-[#000000] min-h-screen text-white">
+<body class="min-h-screen text-white" style="background-image: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://res.cloudinary.com/dcuswyfur/image/upload/v1773082899/Frame_1171275626_oedcgq.png'); background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat;">
     <!-- Page Preloader -->
     <div id="page-preloader">
         <div class="text-center">
@@ -82,16 +82,8 @@
     <!-- Top Navigation Bar -->
     <nav class="bg-[#0a0e27] border-b border-cyan-electric/40 sticky top-0 z-50">
         <div class="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-            <!-- Left: Logo -->
-            <a href="{% url 'home' %}" class="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity">
-                <img 
-                    src="https://katalyst-crm.com/wp-content/uploads/2024/09/K-1.png"
-                    alt="S.O.P Master Logo"
-                    class="h-12 sm:h-16 w-auto"
-                    loading="eager"
-                >
-                <div class="text-sm sm:text-lg font-bold text-white hidden sm:block">S.O.P Master</div>
-            </a>
+            <!-- Left: Home link (logo removed for now) -->
+            <a href="{% url 'home' %}" class="text-sm sm:text-lg font-medium text-white hover:text-cyan-electric transition-colors">Home</a>
             
             <!-- Mobile Menu Button -->
             <button id="mobile-menu-btn" class="md:hidden p-2 text-white hover:text-cyan-electric transition-colors">

@@ -596,13 +596,23 @@ python manage.py migrate
 
 ---
 
+## Auto-Training After AI Course Generation
+
+When the AI finishes generating a course (via the dashboard "Add Course" flow), each lesson is **automatically** sent to the Transcript Training Webhook. No manual feeding is needed.
+
+- **Source**: For AI-generated lessons, transcript is built from `ai_full_description`, `content` (Editor.js blocks), and `description`.
+- **Location**: `_generate_course_ai_content` in `dashboard_views.py` runs training after creating all lessons.
+- **Progress**: The generation progress shows "Training AI chatbots for lessons..." during this phase.
+
+---
+
 ## Future Enhancements
 
 1. **Chat History**: Store chat conversations per user/lesson
 2. **Analytics**: Track popular questions, response times
 3. **Feedback System**: Allow users to rate responses
 4. **Multi-language Support**: Support transcripts in different languages
-5. **Batch Training**: Train multiple lessons at once
+5. **Batch Training**: Train multiple lessons at once (e.g. "Train all" button for existing courses)
 6. **Retraining**: Allow retraining with updated transcripts
 
 ---

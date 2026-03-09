@@ -45,6 +45,7 @@ from .models import (
 from django.contrib import messages
 from django.core.cache import cache
 from django.db import models
+from .utils.chatbot_training import send_lesson_to_chatbot_training, extract_lesson_transcript
 from django.contrib.auth.models import User
 from django.db.models import Avg, Count, Q, Sum
 from django.utils import timezone
@@ -1034,6 +1035,51 @@ def _generate_course_ai_content(course_id, course_name, description, course_type
                 pct = min(95, 15 + int(80 * items_done / total_items))
                 _update_ai_gen_progress(course_id, course_name, 'creating_content', progress=pct, total=total_items, current=f'Lesson: {lesson_title[:50]}')
         
+        # Auto-train AI chatbots: send each lesson to the transcript training webhook
+        all_lessons = list(Lesson.objects.filter(course=course).select_related('course'))
+        if all_lessons:
+            _update_ai_gen_progress(course_id, course_name, 'training_chatbots', progress=96, total=len(all_lessons), current='Training AI chatbots for lessons...')
+            trained = 0
+            failed = 0
+            for i, lesson in enumerate(all_lessons):
+                transcript = extract_lesson_transcript(lesson)
+                if transcript:
+                    success, err = send_lesson_to_chatbot_training(lesson, transcript=transcript)
+                    if success:
+                        trained += 1
+                    else:
+                        failed += 1
+                        print(f'[Background] Chatbot training failed for lesson "{lesson.title}": {err}')
+                else:
+                    print(f'[Background] Skipped chatbot training for lesson "{lesson.title}": no content to train on')
+                pct = min(99, 96 + int(4 * (i + 1) / len(all_lessons)))
+                _update_ai_gen_progress(course_id, course_name, 'training_chatbots', progress=pct, total=len(all_lessons), current=f'Training: {lesson.title[:40]}... ({trained} trained)')
+            print(f'[Background] AI chatbot training: {trained} trained, {failed} failed for course "{course_name}"')
+        
+        # Auto-generate quizzes for each lesson using AI
+        if all_lessons and OPENAI_AVAILABLE and os.getenv('OPENAI_API_KEY'):
+            _update_ai_gen_progress(course_id, course_name, 'generating_quizzes', progress=97, total=len(all_lessons), current='Generating quizzes for lessons...')
+            quizzes_created = 0
+            quizzes_failed = 0
+            for i, lesson in enumerate(all_lessons):
+                try:
+                    quiz, _ = LessonQuiz.objects.get_or_create(
+                        lesson=lesson,
+                        defaults={
+                            'title': f'{lesson.title} Quiz',
+                            'passing_score': 70,
+                        },
+                    )
+                    num_added = generate_ai_quiz(lesson, quiz, num_questions=5)
+                    if num_added > 0:
+                        quizzes_created += 1
+                except Exception as e:
+                    quizzes_failed += 1
+                    print(f'[Background] Quiz generation failed for lesson "{lesson.title}": {e}')
+                pct = min(99, 97 + int(2 * (i + 1) / len(all_lessons)))
+                _update_ai_gen_progress(course_id, course_name, 'generating_quizzes', progress=pct, total=len(all_lessons), current=f'Quiz: {lesson.title[:40]}... ({quizzes_created} created)')
+            print(f'[Background] Quiz generation: {quizzes_created} quizzes created, {quizzes_failed} failed for course "{course_name}"')
+        
         _update_ai_gen_progress(course_id, course_name, 'completed', progress=100, total=total_items, current='Complete!')
         print(f'[Background] Successfully generated AI content for course "{course_name}": {modules_created} modules, {lessons_created} lessons')
         
@@ -1313,6 +1359,12 @@ def generate_ai_quiz(lesson, quiz, num_questions=5):
             lesson_content.append(f"Transcription: {lesson.transcription[:2000]}")  # Limit transcription length
         if lesson.ai_full_description:
             lesson_content.append(f"Full Description: {lesson.ai_full_description}")
+        # Include Editor.js content for AI-generated lessons (no video transcription)
+        if lesson.content:
+            from .utils.chatbot_training import editorjs_to_plain_text
+            content_text = editorjs_to_plain_text(lesson.content)
+            if content_text:
+                lesson_content.append(f"Lesson Content: {content_text[:3000]}")  # Limit for API
         
         if not lesson_content:
             raise Exception('Lesson does not have enough content for AI generation. Please add a description or transcription.')

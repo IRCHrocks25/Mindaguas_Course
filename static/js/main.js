@@ -1,4 +1,4 @@
-// Main JavaScript for S.O.P Master
+// Main JavaScript for Mindaguas.AI
 
 // Smooth scrolling
 document.addEventListener('DOMContentLoaded', function() {
