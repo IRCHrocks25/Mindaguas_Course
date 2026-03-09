@@ -14,19 +14,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-7-9br=zyg7m$!ewa^nlsg+&#e+ux^s00ffn2nh13xl-cvuui@u')
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-j2c8%(78%&!f^sy3#nrf8^1lsktdz++cs0o$)b8!1b=81ec2ry')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'kane-sproject-production.up.railway.app', 'danielwoodcourses-production.up.railway.app', 'sop-master-production.up.railway.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'mindaugas-courses.up.railway.app']
 
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
     'https://localhost',
-    'https://kane-sproject-production.up.railway.app',
-    'https://danielwoodcourses-production.up.railway.app',
-    'https://sop-master-production.up.railway.app',
+    'https://mindaugas-courses.up.railway.app',
 ]
 
 # Application definition
